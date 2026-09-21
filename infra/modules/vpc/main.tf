@@ -9,12 +9,19 @@ resource "aws_vpc" "ecs-vpc" {
 }
 
 # This resource creates a subnet in the VPC for ECS.
-resource "aws_subnet" "ecs-subnet" {
+resource "aws_subnet" "private-subnet" {
     # The ID of the VPC.
     vpc_id     = aws_vpc.ecs-vpc.id
     # The value of an IP address or IP address range.
     cidr_block = "10.0.1.0/24"
 }
+resource "aws_subnet" "public-subnet" {
+    # The ID of the VPC.
+    vpc_id     = aws_vpc.ecs-vpc.id
+    # The value of an IP address or IP address range.
+    cidr_block = "10.0.2.0/24"
+}
+
 # This resource creates an internet gateway for the VPC.
 resource "internet_gateway" "ecs-igw" {
     # The ID of the VPC.
