@@ -6,4 +6,5 @@ resource "aws_vpc" "ecs-vpc" {
 
 # This resource creates a subnet in the VPC for ECS.
 resource "aws_subnet" "ecs-subnet" {
-"
+    # The ID of the VPC.
+    vpc_id     = aws_vpc.ecs-vpc.id
