@@ -27,7 +27,7 @@ resource "aws_subnet" "public-subnet" {
 # This resource creates an internet gateway for the VPC.
 resource "aws_internet_gateway" "ecs-igw" {
     # The ID of the VPC.
-    vpc_id = aws_vpc.ecs-vpc.id
+    vpc_id = aws_vpc.id
     # The tags for the internet gateway.
     tags = {
         Name = "Project VPC IG"
