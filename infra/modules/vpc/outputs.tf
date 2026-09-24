@@ -23,6 +23,11 @@ output "vpc_public_route_table_id" {
   value       = aws_route_table.public_route_table.id
 }
 
+output "vpc_private_route_table_id" {
+  description = "ID of the VPC's private route table"
+  value       = aws_route_table.private_route_table.id
+}
+
 output "vpc_nat_gateway_id" {
   description = "ID of the VPC's NAT gateway"
   value       = aws_nat_gateway.example.id

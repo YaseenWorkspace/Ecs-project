@@ -33,7 +33,7 @@ resource "aws_internet_gateway" "igw" {
     Name = "main"
   }
 }
-# This resource creates a route table for the VPC.
+# This resource creates a public route table for the VPC.
 resource "aws_route_table" "public_route_table" {
   # The ID of the VPC.
  vpc_id = aws_vpc.ecs-vpc.id
@@ -47,17 +47,37 @@ resource "aws_route_table" "public_route_table" {
    Name = "2nd Route Table"
  }
 }
+
+# Private route table
+resource "aws_route_table" "private_route_table" {
+  # The ID of the VPC.
+  vpc_id = aws_vpc.ecs-vpc.id
+  # The route table is associated with the VPC. 
+  route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.example.id
+  }
+}
+
 resource "aws_route_table_association" "public" {
   subnet_id      = aws_subnet.public-subnet.id
   route_table_id = aws_route_table.public_route_table.id
 }
 # Fixed the issue of adding a private route table association to the public route table. The private subnet should be associated with a private route table, not the public one.
-resource "aws_route_table_association" "private" {
+resource "aws_route_table_association" "private_route" {
   subnet_id      = aws_subnet.private-subnet.id
-  route_table_id = aws_route_table.public_route_table.id
+  route_table_id = aws_route_table.private_route_table.id
 }
 
+# Creating an elastic IP for nat gateway
+resource "aws_eip" "example" {
+vpc = true
+}
+# Nat gateway resource block
 resource "aws_nat_gateway" "example" {
-  vpc_id            = aws_vpc.ecs-vpc.id
-  availability_mode = "regional"
+allocation_id = aws_eip.example.id
+subnet_id = aws_subnet.public-subnet.id
+  tags = {
+Name = "gw NAT"
+}
 }
