@@ -47,11 +47,14 @@ resource "aws_route_table" "public_route_table" {
    Name = "2nd Route Table"
  }
 }
-resource "aws_route_table_association" "example" {
+resource "aws_route_table_association" "public" {
   subnet_id      = aws_subnet.public-subnet.id
   route_table_id = aws_route_table.public_route_table.id
-  # The route table allows ECS task to access the internet through the NAT gateway.
-  route_table_id = aws_route_table.private_route_table.id
+}
+# Fixed the issue of adding a private route table association to the public route table. The private subnet should be associated with a private route table, not the public one.
+resource "aws_route_table_association" "private" {
+  subnet_id      = aws_subnet.private-subnet.id
+  route_table_id = aws_route_table.public_route_table.id
 }
 
 resource "aws_nat_gateway" "example" {
