@@ -30,5 +30,5 @@ output "vpc_private_route_table_id" {
 
 output "vpc_nat_gateway_id" {
   description = "ID of the VPC's NAT gateway"
-  value       = aws_nat_gateway.example.id
+  value       = aws_nat_gateway.public_ngw
 }
