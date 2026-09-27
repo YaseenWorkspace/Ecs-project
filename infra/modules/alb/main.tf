@@ -39,9 +39,8 @@ resource "aws_security_group_rule" "inbound" {
   # Only TCP traffic (web, SSH, databases). Not UDP or ICMP (ping).
   protocol          = "tcp"
 
-  # Who's allowed in: any IPv4 address inside the VPC's range.
-  # e.g. if the VPC is 10.0.0.0/24, anything from 10.0.0.0 to 10.0.0.255.
-  cidr_blocks       = [var.vpc_cidr]
+  cidr_blocks       =  ["0.0.0.0/0"]
+
 
   # Which security group this rule is added to.
   security_group_id =  aws_security_group.allow_tls.id
