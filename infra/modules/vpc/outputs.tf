@@ -1,11 +1,11 @@
-output "vpc_public_subnets" {
+output "vpc_public_subnets_id" {
   description = "IDs of the VPC's public subnets"
-  value       = aws_subnet.public-subnet[*].id
+  value       = aws_subnet.public-subnet.id
 }
 
-output "vpc_private_subnets" {
+output "vpc_private_subnets_id" {
   description = "IDs of the VPC's private subnets"
-  value       = aws_subnet.private-subnet[*].id
+  value       = aws_subnet.private-subnet.id
 }
 
 output "vpc_id" {
@@ -31,4 +31,9 @@ output "vpc_private_route_table_id" {
 output "vpc_nat_gateway_id" {
   description = "ID of the VPC's NAT gateway"
   value       = aws_nat_gateway.public_ngw
+}
+
+output "vpc_public_subnets_second_id" {
+  description = "IDs of the VPC's public subnets"
+  value       = aws_subnet.public-subnet-alternative.id
 }

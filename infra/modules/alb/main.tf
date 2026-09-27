@@ -45,9 +45,19 @@ resource "aws_security_group_rule" "inbound" {
 
   # Which security group this rule is added to.
   security_group_id =  aws_security_group.allow_tls.id
-
-
 }
+
+
+resource "aws_security_group_rule" "outbound" {
+  type              = "egress"
+  from_port         = 3000
+  to_port           = 3000
+  protocol          = "tcp"
+  cidr_blocks       = [var.vpc_cidr]
+  security_group_id = aws_security_group.allow_tls.id
+}
+
+
 
 # The group of targets (your ECS tasks) the ALB sends traffic to.
 resource "aws_lb_target_group" "app" {

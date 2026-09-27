@@ -1,3 +1,5 @@
-public_subnet = "10.0.2.0/24"
-private_subnet = "10.0.2.0/24"
-vpc_cidr = "10.0.2.0/24"
+public_subnet = "10.0.0.0/25"
+public_subnet_alternative = "10.0.0.128/26"
+private_subnet = "10.0.0.192/26"
+vpc_cidr = "10.0.0.0/24"
+ecr_repository_name = "ecs-project-application"
