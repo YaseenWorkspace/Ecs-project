@@ -1,6 +1,8 @@
 resource "aws_ecs_cluster" "main" {
   name = "ecs-project-cluster"
 }
+
+
 resource "aws_ecs_service" "mongo" {
   name            = "ecs-project-service"                  
   cluster         = aws_ecs_cluster.main.id                
@@ -9,7 +11,7 @@ resource "aws_ecs_service" "mongo" {
   launch_type     = "FARGATE"                             
 
   network_configuration {                                  
-    subnets          = var.private_subnet_ids              
+    subnets          = [var.private_subnet]            
     security_groups  = [aws_security_group.ecs_tasks.id]   
     assign_public_ip = false                               
   }

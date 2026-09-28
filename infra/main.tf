@@ -19,3 +19,9 @@ module "ecr" {
   source = "./modules/ecr"
   ecr_repository_name = var.ecr_repository_name  
 }
+
+module "ecs" {
+  source = "./modules/ecs"
+  private_subnet = module.vpc.vpc_private_subnets_id
+  
+}
