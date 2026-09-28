@@ -23,5 +23,5 @@ module "ecr" {
 module "ecs" {
   source = "./modules/ecs"
   private_subnet = module.vpc.vpc_private_subnets_id
-  
+  target_group_arn = module.alb.target_group_arn
 }
