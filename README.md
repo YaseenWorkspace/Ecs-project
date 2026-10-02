@@ -10,14 +10,14 @@ The project takes the app from a manual AWS setup (ClickOps) to infrastructure a
 
 | Stage | Status |
 |---|---|
-| 1. Application setup | ✅ Done |
-| 2. Containerisation (multi-stage Dockerfile, non-root user) | ✅ Done |
-| 3. Image registry (ECR) | ✅ Done |
-| 4. ClickOps deployment | ✅ Done |
-| 5. Terraform: VPC, ALB, ECR, ECS | ✅ Done (app reachable through the ALB over HTTP) |
-| 5. Terraform: ACM + Route 53 | 🚧 In progress |
-| 6. CI/CD with GitHub Actions (OIDC) | ⏳ Planned |
-| 7. HTTPS on `tm.<domain>` | ⏳ Planned |
+| 1. Application setup | Done |
+| 2. Containerisation (multi-stage Dockerfile, non-root user) | Done |
+| 3. Image registry (ECR) | Done |
+| 4. ClickOps deployment | Done |
+| 5. Terraform: VPC, ALB, ECR, ECS | Done (app reachable through the ALB over HTTP) |
+| 5. Terraform: ACM + Route 53 | In progress |
+| 6. CI/CD with GitHub Actions (OIDC) | Planned |
+| 7. HTTPS on `tm.<domain>` | Planned |
 
 ---
 
