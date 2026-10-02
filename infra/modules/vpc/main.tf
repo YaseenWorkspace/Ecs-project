@@ -20,7 +20,7 @@ resource "aws_subnet" "public-subnet" {
     vpc_id= aws_vpc.ecs-vpc.id
     # The value of an IP address or IP address range.
     cidr_block = var.subnet_public_cidr
-    availability_zone = "eu-west-1a"
+    availability_zone = "eu-west-2a"
     tags = {
         # The name of the subnet.
         Name = "Public Subnet"
@@ -30,7 +30,7 @@ resource "aws_subnet" "public-subnet" {
 resource "aws_subnet" "public-subnet-alternative" {
     vpc_id= aws_vpc.ecs-vpc.id
     cidr_block = var.subnet_public_cidr_alternative
-    availability_zone = "eu-west-2a"
+    availability_zone = "eu-west-2b"
     tags = {
       Name = "Public Subnet"
       

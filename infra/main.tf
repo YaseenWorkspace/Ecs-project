@@ -26,5 +26,7 @@ module "ecs" {
   target_group_arn = module.alb.target_group_arn
   image_url = module.ecr.repository_url
   image_tag = "latest"
-  aws_security_group = module.alb.security_group_egress_id
+  alb_security_group_id = module.alb.security_group_id
+  vpc_id = module.vpc.vpc_id
+
 }

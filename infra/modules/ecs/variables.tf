@@ -22,3 +22,7 @@ variable vpc_id {
     type = string
 }
 
+variable alb_security_group_id {
+    description = "The ID of the ALB's security group, the only source allowed to reach the tasks"
+    type = string
+}
