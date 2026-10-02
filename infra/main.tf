@@ -30,3 +30,7 @@ module "ecs" {
   vpc_id = module.vpc.vpc_id
 
 }
+module "acm" {
+  source      = "./modules/acm"
+  domain_name = var.domain_name
+}

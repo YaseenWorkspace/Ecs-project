@@ -25,3 +25,9 @@ variable "ecr_repository_name" {
     type        = string
 }
 
+
+
+variable "domain_name" {
+  description = "The subdomain the app is served on"
+  type        = string
+}
