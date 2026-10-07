@@ -89,10 +89,6 @@ resource "aws_cloudwatch_log_group" "app" {
   retention_in_days = 7
 }
 
-resource "aws_iam_group" "group" {
-  name = "test-group"
-}
-
 resource "aws_security_group" "ecs_task" {
   name        = "ecs-tasks-sg"
   description = "Allow traffic from the ALB to the ECS tasks"
