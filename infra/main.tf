@@ -13,6 +13,7 @@ module "alb" {
   subneta = module.vpc.vpc_public_subnets_id
   subnetb = module.vpc.vpc_public_subnets_second_id
   vpc_id = module.vpc.vpc_id
+  certificate_arn = module.acm.certificate_arn
 }
 
 module "ecr" {
@@ -32,5 +33,7 @@ module "ecs" {
 }
 module "acm" {
   source      = "./modules/acm"
-  domain_name = var.domain_name
+  domain_name  = var.domain_name
+  alb_dns_name = module.alb.alb_dns_name
+  alb_zone_id  = module.alb.alb_zone_id
 }
