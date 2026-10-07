@@ -26,7 +26,7 @@ module "ecs" {
   private_subnet = module.vpc.vpc_private_subnets_id
   target_group_arn = module.alb.target_group_arn
   image_url = module.ecr.repository_url
-  image_tag = "latest"
+  image_tag = var.image_tag
   alb_security_group_id = module.alb.security_group_id
   vpc_id = module.vpc.vpc_id
 

@@ -31,3 +31,10 @@ variable "domain_name" {
   description = "The subdomain the app is served on"
   type        = string
 }
+
+
+variable "image_tag" {
+  description = "The Docker image tag to deploy (the pipeline passes the commit SHA)"
+  type        = string
+  default     = "latest"
+}
