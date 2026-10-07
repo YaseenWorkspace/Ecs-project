@@ -47,6 +47,17 @@ resource "aws_security_group_rule" "inbound" {
 }
 
 
+# Allow HTTPS (port 443) in from anywhere, for https://tm.yaseenali.co.uk.
+resource "aws_security_group_rule" "inbound_https" {
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.allow_tls.id
+}
+
+
 resource "aws_security_group_rule" "outbound" {
   type              = "egress"
   from_port         = 3000
