@@ -1,5 +1,5 @@
 # Tell AWS to trust login tokens issued by GitHub Actions.
-# This replaces stored AWS access keys: each pipeline run gets short-lived credentials instead.
+# This replaces stored AWS access keys each pipeline run gets short-lived credentials instead.
 resource "aws_iam_openid_connect_provider" "github" {
   url            = "https://token.actions.githubusercontent.com"
   client_id_list = ["sts.amazonaws.com"]
@@ -33,4 +33,20 @@ resource "aws_iam_role" "github_actions" {
       }
     ]
   })
+}
+
+
+# AWS managed policies for each service the pipeline builds or deploys.
+resource "aws_iam_role_policy_attachment" "github_actions" {
+  for_each = toset([
+    "arn:aws:iam::aws:policy/AmazonEC2FullAccess",                  # VPC, subnets, NAT, security groups, ALB
+    "arn:aws:iam::aws:policy/AmazonECS_FullAccess",                 # ECS cluster, service, task definition
+    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess", # push images, manage the ECR repo
+    "arn:aws:iam::aws:policy/AmazonRoute53FullAccess",              # DNS records
+    "arn:aws:iam::aws:policy/AWSCertificateManagerFullAccess",      # TLS certificate
+    "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess",             # ECS log group
+  ])
+
+  role       = aws_iam_role.github_actions.name
+  policy_arn = each.value
 }
