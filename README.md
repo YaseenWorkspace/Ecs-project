@@ -78,12 +78,14 @@ Browser ──HTTPS :443──► ALB (public subnets) ──HTTP :3000──►
 
 | Area | Tools |
 |---|---|
-| App | React (Threat Composer), served with `serve` |
-| Container | Docker (multi-stage build, `node:25-alpine`) |
+| App | React (Threat Composer), served with nginx |
+| Container | Docker (multi-stage build: node:25-alpine to build, nginx-unprivileged to run) |
 | Registry | Amazon ECR |
 | Compute | Amazon ECS on Fargate |
 | Networking | VPC, public and private subnets, Internet Gateway, NAT Gateway, ALB |
-| IaC | Terraform (AWS provider 6.x), split into modules |
+| DNS and TLS | Cloudflare (main domain), Route 53 (delegated subdomain), ACM certificate |
+| IaC | Terraform (AWS provider 6.x), split into modules, with state in S3 |
+| CI/CD | GitHub Actions, logging in to AWS with OIDC (no stored keys) |
 | Logging | Amazon CloudWatch Logs |
 
 ---
