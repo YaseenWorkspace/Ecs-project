@@ -138,29 +138,40 @@ The [Dockerfile](app/Dockerfile) uses a **multi-stage build**:
 
 ## Terraform modules
 
-Root [infra/main.tf](infra/main.tf) calls each module and passes outputs from one module into the next, e.g. the VPC's subnet IDs go into the ALB and ECS.
+Root [infra/main.tf](infra/main.tf) calls each module and passes outputs from one module into the next, e.g. the VPC's subnet IDs go into the ALB and ECS, and the ACM certificate goes into the ALB. Terraform's state is stored in S3 with locking ([infra/backend.tf](infra/backend.tf)), so local runs and the pipeline share it.
 
-### `vpc`
-- VPC `10.0.0.0/24`
-- Two **public subnets** in `eu-west-2a` and `eu-west-2b` (an ALB needs two Availability Zones)
+### vpc
+- VPC 10.0.0.0/24
+- Two **public subnets** in eu-west-2a and eu-west-2b (an ALB needs two Availability Zones)
 - One **private subnet** for the ECS tasks
 - Internet Gateway, NAT Gateway (with an Elastic IP), and public and private route tables
 
-### `alb`
+### alb
 - Internet-facing **Application Load Balancer** across both public subnets
-- **Security group:** inbound port 80 from anywhere, outbound port 3000 to the VPC only
-- **Target group** on port 3000 with `target_type = "ip"` (required for Fargate) and a health check on `/`
-- **HTTP listener** on port 80 that forwards to the target group
+- **Security group:** inbound 80 and 443 from anywhere, outbound port 3000 to the VPC only
+- **Target group** on port 3000, with target type "ip" (required for Fargate) and a health check on /
+- **HTTPS listener** on 443 with the ACM certificate (TLS 1.2 and 1.3), forwarding to the target group
+- **HTTP listener** on 80 that redirects to HTTPS (301)
 
-### `ecr`
+### ecr
 - Private ECR repository with **scan on push** enabled
 
-### `ecs`
+### ecs
 - **ECS cluster** and **Fargate service** (with a deployment circuit breaker that rolls back automatically)
-- **Task definition:** 0.25 vCPU / 512 MB, `awsvpc` networking, container port 3000
-- **IAM task execution role** with `AmazonECSTaskExecutionRolePolicy`, which lets ECS pull from ECR and write logs
+- **Task definition:** 0.25 vCPU / 512 MB, awsvpc networking, container port 3000, image tag chosen by the pipeline
+- **IAM task execution role** with AmazonECSTaskExecutionRolePolicy, which lets ECS pull from ECR and write logs
 - **Task security group:** inbound port 3000 only, outbound to anywhere (through the NAT gateway)
-- **CloudWatch log group** `/ecs/ecs-project` with 7-day retention
+- **CloudWatch log group** /ecs/ecs-project with 7-day retention
+
+### acm
+- Looks up the **Route 53 hosted zone** for tm.yaseenali.co.uk. The zone is created once by hand, so its nameservers never change and the Cloudflare NS records stay valid.
+- **ACM certificate** for tm.yaseenali.co.uk, validated through a DNS record in that zone
+- **Alias record** pointing tm.yaseenali.co.uk at the ALB
+
+### bootstrap (one-time, separate state)
+- **GitHub OIDC provider**, so AWS trusts GitHub Actions login tokens
+- **IAM role** for the pipeline that only this repository can use, with the permissions it needs to build and deploy
+- Kept separate so destroying the app infrastructure never removes the pipeline's access
 
 ---
 
