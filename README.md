@@ -25,42 +25,52 @@ The project takes the app from a manual AWS setup (ClickOps) to infrastructure a
 ```mermaid
 flowchart LR
     user([User / Browser])
+    cf[Cloudflare DNS<br/>yaseenali.co.uk]
+    gh[GitHub Actions<br/>build, deploy, health check]
 
     subgraph aws[AWS - eu-west-2]
+        r53[Route 53<br/>tm.yaseenali.co.uk]
+        acm[ACM certificate]
         ecr[(ECR<br/>ecs-project-application)]
         cw[CloudWatch Logs<br/>/ecs/ecs-project]
+        s3[(S3<br/>Terraform state)]
 
         subgraph vpc[VPC 10.0.0.0/24]
             igw[Internet Gateway]
 
             subgraph public[Public subnets - eu-west-2a / eu-west-2b]
-                alb[Application Load Balancer<br/>listener :80]
+                alb[Application Load Balancer<br/>:443 HTTPS, :80 redirect]
                 nat[NAT Gateway]
             end
 
             subgraph private[Private subnet]
-                task[ECS Fargate task<br/>Threat Composer :3000]
+                task[ECS Fargate task<br/>nginx + Threat Composer :3000]
             end
         end
     end
 
-    user -->|HTTP :80| igw --> alb
+    user -->|DNS lookup| cf -->|NS delegation| r53
+    user -->|HTTPS :443| igw --> alb
+    acm -.->|TLS certificate| alb
     alb -->|target group :3000| task
     task -->|outbound via NAT| nat --> igw
     task -.->|pull image| ecr
     task -.->|logs| cw
+    gh -->|OIDC: push image| ecr
+    gh -->|OIDC: terraform apply| s3
 ```
 
 ### How a request travels
 
 ```
-Browser ──:80──► ALB (public subnets) ──:3000──► ECS task (private subnet)
+Browser ──HTTPS :443──► ALB (public subnets) ──HTTP :3000──► ECS task (private subnet)
 ```
 
-1. The **ALB** sits in two public subnets in different Availability Zones and accepts HTTP on port 80 from the internet.
-2. The **listener** forwards each request to a **target group** on port 3000.
-3. The **ECS Fargate task** runs in a **private subnet** with no public IP. Its security group only accepts port 3000 traffic, so it can't be reached directly from the internet.
-4. The task reaches out through the **NAT gateway** to pull its image from **ECR** and send logs to **CloudWatch**.
+1. **DNS:** Cloudflare hands tm.yaseenali.co.uk over to Route 53, which points it at the ALB.
+2. The **ALB** sits in two public subnets in different Availability Zones. It accepts HTTPS on port 443 using the **ACM certificate**, and redirects any HTTP request on port 80 to HTTPS.
+3. The **listener** forwards each request to a **target group** on port 3000.
+4. The **ECS Fargate task** runs in a **private subnet** with no public IP. Its security group only accepts port 3000 traffic, so it can't be reached directly from the internet.
+5. The task reaches out through the **NAT gateway** to pull its image from **ECR** and send logs to **CloudWatch**.
 
 ---
 
