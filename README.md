@@ -1,6 +1,6 @@
 # ECS Project: Threat Composer on AWS Fargate
 
-This project deploys [Threat Composer](https://github.com/awslabs/threat-composer), a React threat-modelling app, to **AWS ECS Fargate**. The container image is built with Docker and stored in **Amazon ECR**. All the infrastructure is defined in **Terraform**, and the app is served through an **Application Load Balancer**.
+This project deploys [Threat Composer](https://github.com/awslabs/threat-composer), a React threat-modelling app, to **AWS ECS Fargate**. The container image is built with Docker and stored in **Amazon ECR**. All the infrastructure is defined in **Terraform**, the app is served over **HTTPS** at **https://tm.yaseenali.co.uk**, and every change is deployed by **GitHub Actions**.
 
 The project takes the app from a manual AWS setup (ClickOps) to infrastructure as code, and then to automated deployments.
 
@@ -10,14 +10,13 @@ The project takes the app from a manual AWS setup (ClickOps) to infrastructure a
 
 | Stage | Status |
 |---|---|
-| 1. Application setup | Done |
+| 1. Application setup, with a /health endpoint | Done |
 | 2. Containerisation (multi-stage Dockerfile, non-root user) | Done |
 | 3. Image registry (ECR) | Done |
 | 4. ClickOps deployment | Done |
-| 5. Terraform: VPC, ALB, ECR, ECS | Done (app reachable through the ALB over HTTP) |
-| 5. Terraform: ACM + Route 53 | In progress |
-| 6. CI/CD with GitHub Actions (OIDC) | Planned |
-| 7. HTTPS on `tm.<domain>` | Planned |
+| 5. Terraform: VPC, ALB, ECR, ECS, ACM, Route 53 | Done |
+| 6. CI/CD with GitHub Actions (OIDC) | Done |
+| 7. HTTPS on tm.yaseenali.co.uk | Done |
 
 ---
 
