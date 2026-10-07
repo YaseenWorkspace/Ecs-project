@@ -109,3 +109,21 @@ resource "aws_lb_listener" "http" {
     target_group_arn = aws_lb_target_group.app.arn
   }
 }
+
+
+# Listens on the ALB's port 443 (HTTPS), decrypts the traffic with the ACM certificate,
+# and forwards every request to the target group.
+resource "aws_lb_listener" "https" {
+  load_balancer_arn = aws_lb.alb.arn
+  port              = 443
+  protocol          = "HTTPS"
+
+  # AWS's recommended TLS policy (TLS 1.2 and 1.3 only).
+  ssl_policy      = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  certificate_arn = var.certificate_arn
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.app.arn
+  }
+}

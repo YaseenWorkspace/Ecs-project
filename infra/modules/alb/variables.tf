@@ -19,3 +19,8 @@ variable vpc_cidr {
   description = "The CIDR block for the subnet."
   type        = string
 }
+
+variable "certificate_arn" {
+  description = "The ARN of the ACM certificate used by the HTTPS listener"
+  type        = string
+}
