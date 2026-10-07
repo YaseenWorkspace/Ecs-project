@@ -1,0 +1,61 @@
+name: Terraform Destroy
+
+# Manual only: tear down the paid infrastructure (NAT gateway, ALB, ECS, etc.) from the Actions tab.
+# ECR is kept so the images don't need rebuilding, and the Route 53 hosted zone isn't managed here.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "destroy" to confirm'
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+# Share the deploy lock so a destroy can't run in the middle of a deploy.
+concurrency:
+  group: terraform-deploy
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: eu-west-2
+  AWS_ROLE_ARN: arn:aws:iam::004406189017:role/github-actions-ecs-project
+
+jobs:
+  destroy:
+    name: Terraform destroy (everything except ECR)
+    runs-on: ubuntu-latest
+    if: inputs.confirm == 'destroy'
+    defaults:
+      run:
+        working-directory: infra
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Log in to AWS with OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.15.8
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform destroy
+        run: |
+          terraform destroy -auto-approve -input=false \
+            -target=module.ecs \
+            -target=module.alb \
+            -target=module.vpc \
+            -target=module.acm
+
+      - name: Write job summary
+        run: echo "### Infrastructure destroyed (ECR kept) :wastebasket:" >> "$GITHUB_STEP_SUMMARY"
