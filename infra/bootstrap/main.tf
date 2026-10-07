@@ -26,8 +26,10 @@ resource "aws_iam_role" "github_actions" {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
           }
           # The token must come from this repository (any branch, tag or manual run).
+          # The repo uses GitHub's immutable subject format: owner and repo are pinned by
+          # their numeric IDs, so a renamed or re-created repo with the same name can't match.
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:YaseenWorkspace/Ecs-project:*"
+            "token.actions.githubusercontent.com:sub" = "repo:YaseenWorkspace@306630577/Ecs-project@1360637406:*"
           }
         }
       }
