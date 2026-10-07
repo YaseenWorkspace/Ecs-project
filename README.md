@@ -94,8 +94,13 @@ Browser ──HTTPS :443──► ALB (public subnets) ──HTTP :3000──►
 
 ```
 .
+├─ .github/workflows/
+│  ├─ build.yml              # Build image, tag with commit SHA, push to ECR
+│  ├─ deploy.yml             # Terraform plan/apply + /health check
+│  └─ destroy.yml            # Manual teardown (keeps ECR)
 ├─ app/                      # Threat Composer app source
-│  ├─ Dockerfile             # Multi-stage build: builder > runtime
+│  ├─ Dockerfile             # Multi-stage build: builder > nginx runtime
+│  ├─ nginx.conf             # /health endpoint + single-page app routing
 │  ├─ .dockerignore
 │  └─ src/ ...
 ├─ infra/                    # Terraform
@@ -103,13 +108,16 @@ Browser ──HTTPS :443──► ALB (public subnets) ──HTTP :3000──►
 │  ├─ variables.tf
 │  ├─ outputs.tf
 │  ├─ provider.tf            # AWS provider (eu-west-2)
-│  ├─ terraform.tfvars       # CIDR ranges, ECR repository name
+│  ├─ backend.tf             # Remote state in S3, with locking
+│  ├─ terraform.tfvars       # CIDR ranges, ECR repository name, domain
+│  ├─ bootstrap/             # One-time: GitHub OIDC provider + pipeline IAM role
 │  └─ modules/
 │     ├─ vpc/                # VPC, subnets, IGW, NAT, route tables
-│     ├─ alb/                # ALB, security group, target group, listener
+│     ├─ alb/                # ALB, security group, target group, listeners
 │     ├─ ecr/                # ECR repository
 │     ├─ ecs/                # Cluster, task definition, service, IAM, logs
-│     └─ acm/                # Certificate + Route 53 (in progress)
+│     └─ acm/                # Certificate, DNS validation, Route 53 record
+├─ docs/images/              # Screenshots for the build log
 ├─ .gitignore
 └─ README.md
 ```
