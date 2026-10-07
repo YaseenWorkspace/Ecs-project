@@ -128,10 +128,11 @@ Browser ──HTTPS :443──► ALB (public subnets) ──HTTP :3000──►
 
 The [Dockerfile](app/Dockerfile) uses a **multi-stage build**:
 
-- **Builder stage:** installs dependencies with `yarn` and runs `yarn build` to produce the static React build.
-- **Runtime stage:** a fresh `node:25-alpine` image that receives only the `build/` folder and serves it with `serve`. The source code and `node_modules` stay behind in the builder stage, which keeps the image small.
-- Runs as a **non-root user** (`appuser`).
+- **Builder stage:** installs dependencies with yarn and runs yarn build to produce the static React build.
+- **Runtime stage:** an **nginx-unprivileged** image that receives only the build folder. The source code and node_modules stay behind in the builder stage, which keeps the image small (about 128 MB).
+- Runs as a **non-root user** (nginx, uid 101).
 - Listens on **port 3000**.
+- **/health** returns {"status":"ok"} as JSON. Every other path that isn't a real file is sent to the React app, so links like /workspaces/default/dashboard work on refresh.
 
 ---
 
