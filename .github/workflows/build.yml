@@ -1,0 +1,60 @@
+name: Build and Push
+
+# Runs when the app changes on main, or by hand from the Actions tab.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - ".github/workflows/build.yml"
+  workflow_dispatch:
+
+# id-token: write lets the job request an OIDC token to log in to AWS (no stored keys).
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: eu-west-2
+  ECR_REPOSITORY: ecs-project-application
+  AWS_ROLE_ARN: arn:aws:iam::004406189017:role/github-actions-ecs-project
+
+jobs:
+  build-and-push:
+    name: Build image and push to ECR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Log in to AWS with OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag and push the image
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          IMAGE="$REGISTRY/$ECR_REPOSITORY"
+          # Tag with the commit SHA (exact version) and latest (most recent build).
+          docker build -t "$IMAGE:$IMAGE_TAG" -t "$IMAGE:latest" ./app
+          docker push "$IMAGE:$IMAGE_TAG"
+          docker push "$IMAGE:latest"
+
+      - name: Write job summary
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          echo "### Image pushed to ECR :whale:" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Repository | Tag |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| \`$ECR_REPOSITORY\` | \`$IMAGE_TAG\` |" >> "$GITHUB_STEP_SUMMARY"
