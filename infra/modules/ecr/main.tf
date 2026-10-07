@@ -4,7 +4,7 @@ resource "aws_ecr_repository" "foo" {
 
   # The repository's name in AWS. This becomes part of the image address, e.g.
   # 004406189017.dkr.ecr.eu-west-2.amazonaws.com/bar
-    name = var.ecr_repository_name
+  name = var.ecr_repository_name
 
 
   # Whether an image tag can be reused.

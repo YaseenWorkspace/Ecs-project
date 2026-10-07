@@ -1,40 +1,40 @@
 # This module creates a VPC for ECS with the following resources:
 resource "aws_vpc" "ecs-vpc" {
-    # The value of an IP address or IP address range.
-    cidr_block = var.vpc_cidr
-    tags = {
-        # The name of the VPC.
-        Name = "Project VPC"
-    }
+  # The value of an IP address or IP address range.
+  cidr_block = var.vpc_cidr
+  tags = {
+    # The name of the VPC.
+    Name = "Project VPC"
+  }
 }
 # This resource creates a subnet in the VPC for ECS.
 resource "aws_subnet" "private-subnet" {
-    # The ID of the VPC.
-    vpc_id = aws_vpc.ecs-vpc.id
-    # The value of an IP address or IP address range.
-    cidr_block = var.subnet_private_cidr
-    
+  # The ID of the VPC.
+  vpc_id = aws_vpc.ecs-vpc.id
+  # The value of an IP address or IP address range.
+  cidr_block = var.subnet_private_cidr
+
 }
 resource "aws_subnet" "public-subnet" {
-    # The ID of the VPC.
-    vpc_id= aws_vpc.ecs-vpc.id
-    # The value of an IP address or IP address range.
-    cidr_block = var.subnet_public_cidr
-    availability_zone = "eu-west-2a"
-    tags = {
-        # The name of the subnet.
-        Name = "Public Subnet"
-        
-    }
+  # The ID of the VPC.
+  vpc_id = aws_vpc.ecs-vpc.id
+  # The value of an IP address or IP address range.
+  cidr_block        = var.subnet_public_cidr
+  availability_zone = "eu-west-2a"
+  tags = {
+    # The name of the subnet.
+    Name = "Public Subnet"
+
+  }
 }
 resource "aws_subnet" "public-subnet-alternative" {
-    vpc_id= aws_vpc.ecs-vpc.id
-    cidr_block = var.subnet_public_cidr_alternative
-    availability_zone = "eu-west-2b"
-    tags = {
-      Name = "Public Subnet"
-      
-    } 
+  vpc_id            = aws_vpc.ecs-vpc.id
+  cidr_block        = var.subnet_public_cidr_alternative
+  availability_zone = "eu-west-2b"
+  tags = {
+    Name = "Public Subnet"
+
+  }
 }
 
 
@@ -50,16 +50,16 @@ resource "aws_internet_gateway" "igw" {
 # This resource creates a public route table for the VPC.
 resource "aws_route_table" "public_route_table" {
   # The ID of the VPC.
- vpc_id = aws_vpc.ecs-vpc.id
- # The route table is associated with the VPC. 
- route {
-   cidr_block = "0.0.0.0/0"
-   gateway_id = aws_internet_gateway.igw.id
- }
- # The tags for the route table.
- tags = {
-   Name = "2nd Route Table"
- }
+  vpc_id = aws_vpc.ecs-vpc.id
+  # The route table is associated with the VPC. 
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+  # The tags for the route table.
+  tags = {
+    Name = "2nd Route Table"
+  }
 }
 
 # Private route table
@@ -68,7 +68,7 @@ resource "aws_route_table" "private_route_table" {
   vpc_id = aws_vpc.ecs-vpc.id
   # The route table is associated with the VPC. 
   route {
-    cidr_block = "0.0.0.0/0"
+    cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.public_ngw.id
   }
 }
@@ -81,16 +81,16 @@ resource "aws_route_table_association" "private_route" {
 
 # Creating an elastic IP for nat gateway
 resource "aws_eip" "Eip" {
-  domain   = "vpc"
+  domain = "vpc"
 }
 
 # Nat gateway resource block
 resource "aws_nat_gateway" "public_ngw" {
-allocation_id = aws_eip.Eip.id
-subnet_id = aws_subnet.public-subnet.id
+  allocation_id = aws_eip.Eip.id
+  subnet_id     = aws_subnet.public-subnet.id
   tags = {
-Name = "gw NAT"
-}
+    Name = "gw NAT"
+  }
 }
 
 

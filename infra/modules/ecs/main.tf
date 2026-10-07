@@ -4,48 +4,48 @@ resource "aws_ecs_cluster" "main" {
 
 
 resource "aws_ecs_service" "mongo" {
-  name            = "ecs-project-service"                  
-  cluster         = aws_ecs_cluster.main.id                
-  task_definition = aws_ecs_task_definition.service.arn    
-  desired_count   = 1                                      
-  launch_type     = "FARGATE"                             
+  name            = "ecs-project-service"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.service.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
 
-  network_configuration {                                  
-    subnets          = [var.private_subnet]            
+  network_configuration {
+    subnets          = [var.private_subnet]
     security_groups  = [aws_security_group.ecs_task.id]
-    assign_public_ip = false                               
+    assign_public_ip = false
   }
 
   load_balancer {
-    target_group_arn = var.target_group_arn                
-    container_name   = "first"                             
-    container_port   = 3000                                
+    target_group_arn = var.target_group_arn
+    container_name   = "first"
+    container_port   = 3000
   }
 
-  deployment_circuit_breaker {                           
-    enable   = true                                       
+  deployment_circuit_breaker {
+    enable   = true
     rollback = true
-  }  
+  }
 }
 
 
 
 resource "aws_ecs_task_definition" "service" {
   family                   = "service"
-  requires_compatibilities = ["FARGATE"]               
-  network_mode             = "awsvpc"                 
-  cpu                      = "256"                    
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = "256"
   memory                   = "512"
-  execution_role_arn       = aws_iam_role.task_execution.arn 
+  execution_role_arn       = aws_iam_role.task_execution.arn
 
   container_definitions = jsonencode([
     {
       name         = "first"
-      image        = "${var.image_url}:${var.image_tag}"   
+      image        = "${var.image_url}:${var.image_tag}"
       essential    = true
-      portMappings = [{ containerPort = 3000 }]            
+      portMappings = [{ containerPort = 3000 }]
 
-      logConfiguration = {                                
+      logConfiguration = {
         logDriver = "awslogs"
         options = {
           "awslogs-group"         = aws_cloudwatch_log_group.app.name
@@ -54,7 +54,7 @@ resource "aws_ecs_task_definition" "service" {
         }
       }
     }
-    
+
   ])
 }
 
@@ -69,7 +69,7 @@ resource "aws_iam_role" "task_execution" {
         Effect = "Allow"
         Sid    = ""
         Principal = {
-          Service = "ecs-tasks.amazonaws.com"   
+          Service = "ecs-tasks.amazonaws.com"
         }
       },
     ]
@@ -104,39 +104,39 @@ resource "aws_security_group" "ecs_task" {
 resource "aws_security_group_rule" "inbound" {
 
   # "ingress" = inbound (traffic coming IN). The other option is "egress" (going OUT).
-  type              = "ingress"
+  type = "ingress"
 
   # The port range allowed. 0 to 65535 is every possible port.
-  from_port         = 3000
-  to_port           = 3000
-  
+  from_port = 3000
+  to_port   = 3000
+
 
   # Only TCP traffic (web, SSH, databases). Not UDP or ICMP (ping).
-  protocol          = "tcp"
+  protocol = "tcp"
 
-  cidr_blocks       =  ["0.0.0.0/0"]
+  cidr_blocks = ["0.0.0.0/0"]
 
 
   # Which security group this rule is added to.
-  security_group_id =  aws_security_group.ecs_task.id
+  security_group_id = aws_security_group.ecs_task.id
 }
 
-  resource "aws_security_group_rule" "outbound" {
+resource "aws_security_group_rule" "outbound" {
 
   # "ingress" = inbound (traffic coming IN). The other option is "egress" (going OUT).
-  type              = "egress"
+  type = "egress"
 
   # The port range allowed. 0 to 65535 is every possible port.
-  from_port         = 0
-  to_port           = 0
-  
+  from_port = 0
+  to_port   = 0
+
 
   # Only TCP traffic (web, SSH, databases). Not UDP or ICMP (ping).
-  protocol          = -1
+  protocol = -1
 
-  cidr_blocks       =  ["0.0.0.0/0"]
+  cidr_blocks = ["0.0.0.0/0"]
 
 
   # Which security group this rule is added to.
-  security_group_id =  aws_security_group.ecs_task.id
+  security_group_id = aws_security_group.ecs_task.id
 }
