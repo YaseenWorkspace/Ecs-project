@@ -254,7 +254,7 @@ _To be added:_
 - Container running locally
 - Image in ECR
 - ECS service running with a healthy target
-- App live on `https://tm.<domain>`
+- App live on https://tm.yaseenali.co.uk
 - Successful GitHub Actions pipeline run
 
 ---
