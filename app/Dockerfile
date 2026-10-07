@@ -7,15 +7,9 @@ RUN yarn build
 
 
 
-FROM node:25-alpine
-WORKDIR /app
-COPY --from=builder /app/build /app/build
+# Runtime: nginx serves the static React build. The unprivileged image runs as a
+# non-root user (nginx, uid 101) and is much smaller than a Node.js image.
+FROM nginxinc/nginx-unprivileged:stable-alpine
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/build /usr/share/nginx/html
 EXPOSE 3000
-RUN yarn global add serve 
-RUN adduser -S appuser 
-RUN chown -R appuser /app/build
-USER appuser
-CMD [ "serve", "-s", "build" ]
-
-
-
