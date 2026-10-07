@@ -50,3 +50,32 @@ resource "aws_iam_role_policy_attachment" "github_actions" {
   role       = aws_iam_role.github_actions.name
   policy_arn = each.value
 }
+
+
+# Narrow extra permissions: read/write this project's state in S3, and manage
+# only the ECS task execution role (not every IAM role in the account).
+resource "aws_iam_role_policy" "github_actions_extra" {
+  name = "terraform-state-and-ecs-role"
+  role = aws_iam_role.github_actions.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = "arn:aws:s3:::terraform-state-yaseen"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
+        Resource = "arn:aws:s3:::terraform-state-yaseen/ecs-project/*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["iam:*Role*", "iam:PassRole"]
+        Resource = "arn:aws:iam::004406189017:role/ecs-task-execution-role"
+      }
+    ]
+  })
+}
