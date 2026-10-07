@@ -1,0 +1,125 @@
+name: Terraform Deploy
+
+# Runs after a successful image build on main, when the infrastructure code changes,
+# or by hand from the Actions tab (optionally choosing which image tag to deploy).
+on:
+  workflow_run:
+    workflows: ["Build and Push"]
+    types: [completed]
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - "infra/**"
+      - "!infra/bootstrap/**"
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Image tag to deploy (a commit SHA, or latest)"
+        required: false
+        default: "latest"
+
+permissions:
+  id-token: write
+  contents: read
+
+# Never run two deploys at once: they would fight over the same Terraform state.
+concurrency:
+  group: terraform-deploy
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: eu-west-2
+  AWS_ROLE_ARN: arn:aws:iam::004406189017:role/github-actions-ecs-project
+  APP_URL: https://tm.yaseenali.co.uk
+
+jobs:
+  terraform:
+    name: Terraform plan and apply
+    runs-on: ubuntu-latest
+    # After a build, only deploy if the build succeeded.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    defaults:
+      run:
+        working-directory: infra
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+        with:
+          # After a build, deploy exactly the commit that was built.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Pick the image tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "image_tag=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "image_tag=${{ inputs.image_tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "image_tag=latest" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Log in to AWS with OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.15.8
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terraform plan
+        run: terraform plan -input=false -out=tfplan -var="image_tag=${{ steps.tag.outputs.image_tag }}"
+
+      - name: Terraform apply
+        run: terraform apply -input=false tfplan
+
+      - name: Write job summary
+        run: |
+          echo "### Terraform applied :rocket:" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Image tag: \`${{ steps.tag.outputs.image_tag }}\`" >> "$GITHUB_STEP_SUMMARY"
+
+  health-check:
+    name: Post-deploy health check
+    runs-on: ubuntu-latest
+    needs: terraform
+
+    steps:
+      - name: Log in to AWS with OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Wait for the ECS service to be stable
+        run: aws ecs wait services-stable --cluster ecs-project-cluster --services ecs-project-service
+
+      - name: Check /health returns {"status":"ok"}
+        run: |
+          # Retry for up to 5 minutes: DNS and the ALB target can take a little while.
+          for attempt in $(seq 1 20); do
+            body=$(curl -fsS --max-time 10 "$APP_URL/health" || true)
+            echo "Attempt $attempt: $body"
+            if echo "$body" | grep -q '"status":"ok"'; then
+              echo "### Health check passed :white_check_mark:" >> "$GITHUB_STEP_SUMMARY"
+              echo "\`$APP_URL/health\` returned \`$body\`" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "### Health check failed :x:" >> "$GITHUB_STEP_SUMMARY"
+          exit 1
