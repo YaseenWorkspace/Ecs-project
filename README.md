@@ -183,16 +183,38 @@ docker build -t threat-composer .
 docker run -p 3000:3000 threat-composer
 ```
 
-Then open <http://localhost:3000>.
+Then open <http://localhost:3000>, and check the health endpoint:
+
+```bash
+curl http://localhost:3000/health
+# {"status":"ok"}
+```
 
 ---
 
-## Deploy to AWS
+## CI/CD (GitHub Actions)
+
+Three workflows in [.github/workflows](.github/workflows). All of them log in to AWS with **OIDC**: GitHub hands each run a short-lived token, and AWS swaps it for temporary credentials for a role only this repository can use. No AWS keys are stored in GitHub.
+
+| Workflow | Runs when | What it does |
+|---|---|---|
+| **Build and Push** | app/ changes on main, or run by hand | Builds the image, tags it with the commit SHA (and latest), pushes it to ECR |
+| **Terraform Deploy** | after a successful build, when infra/ changes, or run by hand | terraform fmt, validate, plan and apply with the new image tag, then waits for ECS and checks https://tm.yaseenali.co.uk/health returns {"status":"ok"}. The run fails if it doesn't. |
+| **Terraform Destroy** | run by hand only, after typing "destroy" | Tears down everything except ECR, to stop costs |
+
+Deploys never run at the same time, so two runs can't change the Terraform state at once. Each run writes a summary (image tag, health check result) to its page in the Actions tab.
+
+---
+
+## Deploy to AWS by hand
+
+The pipeline does all of this automatically. These are the manual steps, e.g. for a first setup.
 
 ### Prerequisites
-- AWS CLI, configured with an IAM user that can manage VPC, EC2, ELB, ECR, ECS, IAM and CloudWatch Logs
+- AWS CLI, configured with an IAM user that can manage VPC, EC2, ELB, ECR, ECS, IAM, Route 53, ACM and CloudWatch Logs
 - Terraform 1.x
 - Docker
+- A Route 53 hosted zone for the subdomain, with NS records for it added at the main domain's DNS provider
 
 ### 1. Create the ECR repository first
 The ECS service needs the image to exist before it starts, so create only the repository first:
@@ -216,12 +238,12 @@ cd ../infra
 terraform apply
 ```
 
-After 2–3 minutes, the ECS service reaches a steady state and the target becomes healthy. You can find the app's address in **EC2 → Load Balancers → `my-alb` → DNS name**.
+This takes about 5–8 minutes, mostly the NAT gateway, the ALB and the certificate validation. After that, the app is live at https://tm.yaseenali.co.uk.
 
 ### 4. Tear it down
-The NAT gateway and ALB are charged by the hour. To destroy everything except ECR (so the image doesn't need pushing again):
+The NAT gateway and ALB are charged by the hour. To destroy everything except ECR (so the image doesn't need pushing again), run the **Terraform Destroy** workflow, or:
 ```bash
-terraform destroy -target=module.ecs -target=module.alb -target=module.vpc
+terraform destroy -target=module.ecs -target=module.alb -target=module.vpc -target=module.acm
 ```
 
 ---
