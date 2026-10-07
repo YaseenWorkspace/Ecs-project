@@ -93,7 +93,7 @@ resource "aws_lb_target_group" "app" {
 }
 
 
-# Listens on the ALB's port 80 and forwards every request to the target group.
+# Listens on the ALB's port 80 and redirects every request to HTTPS.
 resource "aws_lb_listener" "http" {
 
   # Which load balancer this listener is on.
@@ -103,10 +103,16 @@ resource "aws_lb_listener" "http" {
   port              = 80
   protocol          = "HTTP"
 
-  # What to do with the traffic: send it to the target group.
+  # What to do with the traffic: send the browser to the same URL on https:// (port 443).
+  # HTTP_301 = permanent redirect, so browsers remember to use HTTPS next time.
   default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.app.arn
+    type = "redirect"
+
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
   }
 }
 
