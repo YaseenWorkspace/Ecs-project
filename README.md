@@ -264,16 +264,16 @@ The infrastructure is torn down between demos to save cost (the NAT gateway and 
 
 ## Roadmap
 
-- [x] **ACM certificate** for tm.yaseenali.co.uk, validated through DNS in Route 53
-- [x] **Route 53 alias record** pointing tm.yaseenali.co.uk at the ALB (subdomain delegated from Cloudflare)
-- [x] **HTTPS listener** on 443, with HTTP redirected to HTTPS
-- [x] **/health endpoint** returning {"status":"ok"}
-- [x] **Remote Terraform state** in S3, with locking
-- [x] **GitHub Actions**: build and push the image (tagged with the commit SHA), Terraform plan/apply, post-deploy health check, with **OIDC** instead of stored AWS keys
-- [x] terraform fmt and validate in CI, plus job summaries
-- [ ] tflint in CI
-- [ ] Pin the private subnet to an Availability Zone the ALB covers, so a rebuild can't place tasks where the ALB can't reach them (see build log, section 8)
-- [ ] Screenshots of the live app and a successful pipeline run
+- ✔️ **ACM certificate** for tm.yaseenali.co.uk, validated through DNS in Route 53
+- ✔️ **Route 53 alias record** pointing tm.yaseenali.co.uk at the ALB (subdomain delegated from Cloudflare)
+- ✔️ **HTTPS listener** on 443, with HTTP redirected to HTTPS
+- ✔️ **/health endpoint** returning {"status":"ok"}
+- ✔️ **Remote Terraform state** in S3, with locking
+- ✔️ **GitHub Actions**: build and push the image (tagged with the commit SHA), Terraform plan/apply, post-deploy health check, with **OIDC** instead of stored AWS keys
+- ✔️ terraform fmt and validate in CI, plus job summaries
+- ⬜ tflint in CI
+- ⬜ Pin the private subnet to an Availability Zone the ALB covers, so a rebuild can't place tasks where the ALB can't reach them (see build log, section 8)
+- ⬜ Screenshots of the live app and a successful pipeline run
 
 ---
 
