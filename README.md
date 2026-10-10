@@ -254,6 +254,14 @@ The infrastructure is torn down between demos to save cost (the NAT gateway and 
 
 ---
 
+## Known limitations
+
+- **Single private subnet:** ECS tasks run in one private subnet (one Availability Zone), so the app isn't highly available. Production would use a private subnet in each AZ.
+- **Single NAT gateway:** one NAT gateway is a single point of failure for outbound traffic. Production would use one per AZ.
+- **Health check path:** the ALB target group checks /; it would be better pointed at the dedicated /health endpoint.
+
+---
+
 ## Roadmap
 
 - [x] **ACM certificate** for tm.yaseenali.co.uk, validated through DNS in Route 53
