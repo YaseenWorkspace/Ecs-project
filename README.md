@@ -248,14 +248,9 @@ terraform destroy -target=module.ecs -target=module.alb -target=module.vpc -targ
 
 ---
 
-## Screenshots
+## Infrastructure status
 
-_To be added:_
-- Container running locally
-- Image in ECR
-- ECS service running with a healthy target
-- App live on https://tm.yaseenali.co.uk
-- Successful GitHub Actions pipeline run
+The infrastructure is torn down between demos to save cost (the NAT gateway and ALB are billed by the hour). It can be redeployed in about 5–8 minutes by running the **Terraform Deploy** workflow. The build log below includes screenshots from earlier deployments.
 
 ---
 
