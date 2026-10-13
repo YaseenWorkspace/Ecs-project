@@ -1,0 +1,241 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1480" viewBox="0 0 1400 1480" font-family="Segoe UI, Arial, Helvetica, sans-serif" font-size="14" fill="#cfcfcf">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#e6e6e6"/>
+    </marker>
+    <marker id="arrDim" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9a9a9a"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1400" height="1480" fill="#141414"/>
+
+  <!-- ============ Containers ============ -->
+  <!-- AWS Cloud -->
+  <rect x="120" y="170" width="1160" height="1010" fill="none" stroke="#8a8a8a" stroke-width="1.5"/>
+  <rect x="120" y="170" width="112" height="26" fill="#232f3e"/>
+  <text x="132" y="188" font-weight="600" fill="#ffffff" font-size="13">AWS Cloud</text>
+
+  <!-- Region -->
+  <rect x="170" y="330" width="1060" height="800" fill="none" stroke="#7d7d7d" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <text x="184" y="352" fill="#a8a8a8" font-size="13">Region: eu-west-2 (London)</text>
+
+  <!-- VPC -->
+  <rect x="220" y="380" width="960" height="560" fill="none" stroke="#9a9a9a" stroke-width="1.5"/>
+  <text x="234" y="402" fill="#c9a8ff" font-size="13">VPC · 10.0.0.0/24</text>
+
+  <!-- Availability Zones -->
+  <rect x="260" y="530" width="420" height="385" fill="none" stroke="#8a8a8a" stroke-width="1.2" stroke-dasharray="3 4"/>
+  <text x="274" y="551" fill="#ffffff" font-size="13" font-weight="600">Availability Zone eu-west-2a</text>
+  <rect x="720" y="530" width="420" height="385" fill="none" stroke="#8a8a8a" stroke-width="1.2" stroke-dasharray="3 4"/>
+  <text x="734" y="551" fill="#ffffff" font-size="13" font-weight="600">Availability Zone eu-west-2b</text>
+
+  <!-- Public subnets -->
+  <rect x="285" y="580" width="370" height="120" fill="#1e2a14"/>
+  <text x="297" y="600" fill="#8fce3a" font-size="13">Public subnet · 10.0.0.0/25</text>
+  <rect x="745" y="580" width="370" height="120" fill="#1e2a14"/>
+  <text x="757" y="600" fill="#8fce3a" font-size="13">Public subnet · 10.0.0.128/26</text>
+
+  <!-- Private subnet -->
+  <rect x="745" y="730" width="370" height="165" fill="#122434"/>
+  <text x="757" y="750" fill="#4aa8ff" font-size="13">Private subnet · 10.0.0.192/26</text>
+
+  <!-- ECS service + security group -->
+  <rect x="765" y="762" width="330" height="120" fill="none" stroke="#ED7100" stroke-width="1.5"/>
+  <text x="777" y="781" fill="#ED7100" font-size="13">ECS service (Fargate)</text>
+  <rect x="800" y="790" width="260" height="82" fill="none" stroke="#DD344C" stroke-width="1.2"/>
+  <text x="810" y="806" fill="#ff6b7f" font-size="11.5">Security group · 3000 from ALB only</text>
+
+  <text x="400" y="810" text-anchor="middle" fill="#6f6f6f" font-size="12" font-style="italic">No private subnet in this zone</text>
+
+  <!-- ============ Arrows ============ -->
+  <g fill="none" stroke="#e6e6e6" stroke-width="1.6">
+    <!-- User -> Cloudflare -->
+    <path d="M664,70 H376" marker-end="url(#arr)"/>
+    <!-- Cloudflare -> Route 53 -->
+    <path d="M330,96 V262 H664" marker-end="url(#arr)"/>
+    <!-- User -> Route 53 -->
+    <path d="M700,106 V226" marker-end="url(#arr)"/>
+    <!-- Route 53 <-> ACM -->
+    <path d="M738,262 H962" marker-start="url(#arr)" marker-end="url(#arr)"/>
+    <!-- Route 53 -> IGW -->
+    <path d="M700,294 V350" marker-end="url(#arr)"/>
+    <!-- IGW -> ALB -->
+    <path d="M700,406 V438" marker-end="url(#arr)"/>
+    <!-- ALB -> both public subnets -->
+    <path d="M700,498 V515 H480 V630" marker-end="url(#arr)"/>
+    <path d="M700,515 H1010 V630" marker-end="url(#arr)"/>
+    <!-- ALB node -> ECS task -->
+    <path d="M1010,664 V788" marker-end="url(#arr)"/>
+    <!-- Docker -> ECR -->
+    <path d="M760,1286 V1215 H480 V1076" marker-end="url(#arr)"/>
+    <!-- Developer -> GitHub Actions -> Docker -->
+    <path d="M214,1320 H464" marker-end="url(#arr)"/>
+    <path d="M536,1320 H716" marker-end="url(#arr)"/>
+    <!-- GitHub Actions -> Terraform -->
+    <path d="M500,1354 V1410 H1003 V1366" marker-end="url(#arr)"/>
+    <!-- Terraform -> S3 -->
+    <path d="M1003,1292 V1078" marker-end="url(#arr)"/>
+    <!-- Terraform -> AWS -->
+    <path d="M966,1326 H880 V1184" marker-end="url(#arr)"/>
+  </g>
+  <g fill="none" stroke="#9a9a9a" stroke-width="1.4" stroke-dasharray="5 4">
+    <!-- Task -> NAT -->
+    <path d="M765,836 H540 V672" marker-end="url(#arrDim)"/>
+    <!-- Task -> ECR and CloudWatch -->
+    <path d="M880,882 V975 H480 V1004" marker-end="url(#arrDim)"/>
+    <path d="M760,975 V1004" marker-end="url(#arrDim)"/>
+  </g>
+
+  <!-- ============ Arrow labels ============ -->
+  <g font-size="12.5" fill="#bdbdbd">
+    <text x="520" y="61" text-anchor="middle">DNS lookup</text>
+    <text x="344" y="252">NS delegation for tm</text>
+    <text x="712" y="160">HTTPS :443</text>
+    <text x="850" y="252" text-anchor="middle">DNS validation</text>
+    <text x="1022" y="722">HTTP :3000</text>
+    <text x="552" y="766">outbound via NAT</text>
+    <text x="492" y="996">pull image</text>
+    <text x="772" y="996">logs</text>
+    <text x="339" y="1310" text-anchor="middle">git push</text>
+    <text x="626" y="1310" text-anchor="middle">build</text>
+    <text x="620" y="1206" text-anchor="middle">push image, tagged with commit SHA</text>
+    <text x="750" y="1401" text-anchor="middle">terraform plan / apply</text>
+    <text x="1015" y="1210">state + lock</text>
+    <text x="870" y="1256" text-anchor="end">provisions</text>
+  </g>
+
+  <!-- ============ Icons ============ -->
+  <!-- User -->
+  <g fill="none" stroke="#e6e6e6" stroke-width="2.4">
+    <circle cx="700" cy="50" r="16"/>
+    <path d="M670,102 a30,26 0 0 1 60,0"/>
+  </g>
+  <text x="744" y="76" fill="#ffffff">User</text>
+
+  <!-- Cloudflare -->
+  <path d="M302,90 a15,15 0 0 1 5,-29 a22,22 0 0 1 42,3 a13,13 0 0 1 5,26 z" fill="none" stroke="#F6821F" stroke-width="2.6"/>
+  <text x="282" y="68" text-anchor="end" fill="#ffffff">Cloudflare DNS</text>
+  <text x="282" y="86" text-anchor="end" font-size="12.5">yaseenali.co.uk</text>
+
+  <!-- Route 53 -->
+  <rect x="668" y="230" width="64" height="64" rx="6" fill="#8C4FFF"/>
+  <path d="M700,240 l17,6 v15 c0,11 -8,18 -17,22 c-9,-4 -17,-11 -17,-22 v-15 z" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <text x="700" y="268" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="14">53</text>
+  <text x="746" y="290" fill="#ffffff">Route 53</text>
+  <text x="746" y="307" font-size="12.5">tm.yaseenali.co.uk</text>
+
+  <!-- ACM -->
+  <rect x="968" y="230" width="64" height="64" rx="6" fill="#DD344C"/>
+  <g fill="none" stroke="#ffffff" stroke-width="2">
+    <rect x="980" y="244" width="40" height="30"/>
+    <circle cx="1000" cy="257" r="6"/>
+    <path d="M996,262 l-3,10 M1004,262 l3,10"/>
+    <path d="M985,281 h30"/>
+  </g>
+  <text x="1000" y="314" text-anchor="middle" fill="#ffffff">ACM certificate</text>
+
+  <!-- Internet Gateway -->
+  <circle cx="700" cy="380" r="26" fill="#141414" stroke="#8C4FFF" stroke-width="3"/>
+  <path d="M687,394 v-15 a13,13 0 0 1 26,0 v15 M693,394 v-15 a7,7 0 0 1 14,0 v15" fill="none" stroke="#8C4FFF" stroke-width="2.4"/>
+  <text x="738" y="366" fill="#ffffff">Internet Gateway</text>
+
+  <!-- Application Load Balancer -->
+  <circle cx="700" cy="468" r="28" fill="#141414" stroke="#8C4FFF" stroke-width="3"/>
+  <g fill="none" stroke="#8C4FFF" stroke-width="2">
+    <rect x="693" y="452" width="14" height="9"/>
+    <path d="M700,461 v7 M684,476 v-8 h32 v8 M700,468 v8"/>
+    <rect x="679" y="476" width="10" height="8"/>
+    <rect x="695" y="476" width="10" height="8"/>
+    <rect x="711" y="476" width="10" height="8"/>
+  </g>
+  <text x="742" y="462" fill="#ffffff">Application Load Balancer</text>
+  <text x="742" y="480" font-size="12.5">:443 HTTPS · :80 redirects to HTTPS</text>
+
+  <!-- ALB nodes -->
+  <g fill="#141414" stroke="#8C4FFF" stroke-width="2.4">
+    <circle cx="480" cy="648" r="14"/>
+    <circle cx="1010" cy="648" r="14"/>
+  </g>
+  <text x="458" y="653" font-size="12.5" text-anchor="end">ALB node</text>
+  <text x="988" y="653" font-size="12.5" text-anchor="end">ALB node</text>
+
+  <!-- NAT Gateway -->
+  <rect x="518" y="626" width="44" height="44" rx="5" fill="#141414" stroke="#8C4FFF" stroke-width="2.4"/>
+  <path d="M528,642 h20 m-5,-5 l5,5 l-5,5 M552,656 h-20 m5,-5 l-5,5 l5,5" fill="none" stroke="#8C4FFF" stroke-width="2"/>
+  <text x="572" y="645" font-size="12.5" fill="#ffffff">NAT</text>
+  <text x="572" y="661" font-size="12.5" fill="#ffffff">Gateway</text>
+
+  <!-- ECS task -->
+  <g fill="none" stroke="#ED7100" stroke-width="2.2">
+    <rect x="826" y="818" width="36" height="44"/>
+    <path d="M833,829 h5 M843,829 h12 M833,840 h5 M843,840 h12 M833,851 h5 M843,851 h12"/>
+  </g>
+  <text x="874" y="838" fill="#ffffff">Task: nginx + app</text>
+  <text x="874" y="855" font-size="12.5">port 3000 · non-root</text>
+
+  <!-- ECR -->
+  <rect x="448" y="1008" width="64" height="64" rx="6" fill="#ED7100"/>
+  <g fill="none" stroke="#ffffff" stroke-width="2">
+    <path d="M480,1020 l18,10 v20 l-18,10 l-18,-10 v-20 z"/>
+    <path d="M462,1030 l18,10 l18,-10 M480,1040 v20"/>
+  </g>
+  <text x="524" y="1036" fill="#ffffff">Amazon ECR</text>
+  <text x="524" y="1053" font-size="12.5">ecs-project-application</text>
+
+  <!-- CloudWatch -->
+  <rect x="728" y="1008" width="64" height="64" rx="6" fill="#E7157B"/>
+  <g fill="none" stroke="#ffffff" stroke-width="2">
+    <circle cx="756" cy="1036" r="12"/>
+    <path d="M765,1045 l11,11"/>
+    <path d="M749,1039 l4,-5 l4,3 l5,-6"/>
+  </g>
+  <text x="804" y="1036" fill="#ffffff">CloudWatch Logs</text>
+  <text x="804" y="1053" font-size="12.5">/ecs/ecs-project</text>
+
+  <!-- S3 -->
+  <g fill="none" stroke="#7AA116" stroke-width="2.6">
+    <ellipse cx="1003" cy="1020" rx="25" ry="7"/>
+    <path d="M978,1020 l6,40 a19,6 0 0 0 38,0 l6,-40"/>
+  </g>
+  <text x="1042" y="1036" fill="#ffffff">Amazon S3</text>
+  <text x="1042" y="1053" font-size="12.5">Terraform state</text>
+
+  <!-- Developer -->
+  <g fill="none" stroke="#e6e6e6" stroke-width="2.2">
+    <circle cx="180" cy="1304" r="12"/>
+    <path d="M158,1342 a22,20 0 0 1 44,0"/>
+    <circle cx="200" cy="1338" r="9" fill="#141414"/>
+    <path d="M195,1338 l4,4 l6,-7"/>
+  </g>
+  <text x="180" y="1372" text-anchor="middle" fill="#ffffff">Developer</text>
+
+  <!-- GitHub Actions -->
+  <circle cx="500" cy="1320" r="30" fill="#141414" stroke="#58a6ff" stroke-width="2.6"/>
+  <path d="M491,1307 l20,13 l-20,13 z" fill="#58a6ff"/>
+  <text x="500" y="1260" text-anchor="middle" fill="#ffffff">GitHub Actions</text>
+  <text x="500" y="1278" text-anchor="middle" font-size="12.5">OIDC login · no stored AWS keys</text>
+
+  <!-- Docker -->
+  <g fill="#2496ED">
+    <rect x="738" y="1306" width="9" height="9"/><rect x="749" y="1306" width="9" height="9"/><rect x="760" y="1306" width="9" height="9"/>
+    <rect x="749" y="1295" width="9" height="9"/><rect x="760" y="1295" width="9" height="9"/>
+    <rect x="771" y="1306" width="9" height="9"/>
+    <path d="M726,1319 h62 c7,0 10,-4 12,-8 c-2,14 -10,30 -34,30 c-22,0 -34,-8 -40,-22 z"/>
+  </g>
+  <text x="760" y="1366" text-anchor="middle" fill="#ffffff">Docker</text>
+
+  <!-- Terraform -->
+  <g fill="#7B42BC">
+    <polygon points="972,1298 990,1306 990,1326 972,1318"/>
+    <polygon points="994,1308 1012,1316 1012,1336 994,1328"/>
+    <polygon points="1016,1316 1034,1308 1034,1328 1016,1336"/>
+    <polygon points="994,1332 1012,1340 1012,1360 994,1352"/>
+  </g>
+  <text x="1048" y="1320" fill="#ffffff">Terraform</text>
+  <text x="1048" y="1338" font-size="12.5">fmt · validate · plan · apply</text>
+
+  <!-- Footer note -->
+  <text x="700" y="1452" text-anchor="middle" fill="#8f8f8f" font-size="12.5">After each deploy, the pipeline checks that https://tm.yaseenali.co.uk/health returns {"status":"ok"}</text>
+</svg>
